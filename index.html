@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dil Öğretmenin - İyilik İçin Yapay Zeka</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap');
+  :root{--bg:#0f1117;--surface:#181c27;--surface2:#1f2436;--border:#2a3050;--accent:#6ee7b7;--accent-dim:#1a4035;--accent2:#a78bfa;--text:#e8eaf0;--text-dim:#7b849a;--user-bubble:#1e2a4a;--ai-bubble:#1a2535;--radius:14px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+  header{padding:13px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;gap:12px}
+  .header-left{display:flex;align-items:center;gap:10px;min-width:0}
+  .level-badge{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:var(--accent);background:var(--accent-dim);padding:2px 10px;border-radius:6px;flex-shrink:0}
+  .header-title{font-size:13px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .reset-btn{font-size:12px;color:var(--text-dim);background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-family:'Inter',sans-serif;flex-shrink:0;transition:all .15s}
+  .reset-btn:hover{border-color:var(--accent);color:var(--accent)}
+  #setup{flex:1;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px}
+  .setup-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;max-width:460px;width:100%}
+  .setup-card h2{font-family:'Fraunces',serif;font-size:24px;font-weight:300;margin-bottom:5px}
+  .setup-card>p{font-size:13px;color:var(--text-dim);margin-bottom:22px;line-height:1.6}
+  .section-title{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+  .field-group{margin-bottom:18px}
+  label{display:block;font-size:11px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+  select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:10px 12px;outline:none;transition:border-color .2s;appearance:none;cursor:pointer}
+  select:focus{border-color:var(--accent)}
+  .free{background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12.5px;padding:9px 12px;margin-bottom:18px;text-align:center}
+  .level-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .lvl-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:10px 6px;cursor:pointer;text-align:center;transition:all .15s;line-height:1.3}
+  .lvl-btn span{display:block;font-size:10px;margin-top:3px;opacity:.7}
+  .lvl-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .lvl-btn.selected{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+  .lvl-btn.selected span{opacity:1}
+  .divider{border:none;border-top:1px solid var(--border);margin:18px 0}
+  .start-btn{width:100%;margin-top:6px;padding:12px;background:var(--accent);color:#0a1a12;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;border:none;border-radius:8px;cursor:pointer;transition:opacity .2s}
+  .start-btn:hover{opacity:.88}.start-btn:disabled{opacity:.4;cursor:default}
+  .key-hint{font-size:11px;color:var(--text-dim);margin-top:8px;text-align:center}
+  #chat{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+  .bubble-row{display:flex;align-items:flex-end;gap:8px;animation:slideUp .22s ease}
+  @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .bubble-row.user{flex-direction:row-reverse}
+  .avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .avatar.ai{background:var(--accent-dim)}.avatar.user{background:#2a2050}
+  .bubble{max-width:min(76%,480px);padding:11px 14px;border-radius:var(--radius);font-size:14px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+  .bubble.ai{background:var(--ai-bubble);border:1px solid var(--border);border-bottom-left-radius:4px}
+  .bubble.user{background:var(--user-bubble);border-bottom-right-radius:4px;color:#d0d8f8}
+  .typing-indicator{display:flex;align-items:center;gap:4px;padding:12px 14px}
+  .typing-indicator span{width:6px;height:6px;background:var(--text-dim);border-radius:50%;animation:bounce 1.2s infinite}
+  .typing-indicator span:nth-child(2){animation-delay:.2s}.typing-indicator span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+  #input-bar{padding:10px 14px 12px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
+  .cmd-strip{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+  .cmd-btn{font-size:11px;font-family:'Inter',sans-serif;font-weight:500;padding:4px 9px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);cursor:pointer;transition:all .15s;white-space:nowrap}
+  .cmd-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+  .input-row{display:flex;gap:8px;align-items:flex-end}
+  #user-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:10px 12px;outline:none;resize:none;min-height:42px;max-height:120px;line-height:1.5;transition:border-color .2s}
+  #user-input:focus{border-color:var(--accent)}#user-input::placeholder{color:var(--text-dim)}
+  .send-btn{width:42px;height:42px;flex-shrink:0;background:var(--accent);border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .2s}
+  .send-btn:hover{opacity:.85}.send-btn:disabled{opacity:.4;cursor:default}.send-btn svg{width:17px;height:17px;fill:#0a1a12}
+  .hidden{display:none!important}
+  #chat::-webkit-scrollbar{width:4px}#chat::-webkit-scrollbar-track{background:transparent}#chat::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <span class="level-badge" id="level-badge">–</span>
+    <span class="header-title" id="header-subtitle">Dil Öğretmenin</span>
+  </div>
+  <button class="reset-btn hidden" id="reset-btn" onclick="resetSession()">↩ Yeniden Başla</button>
+</header>
+
+<div id="setup">
+  <div class="setup-card">
+    <h2>Dil Öğretmenin</h2>
+    <p>Yapay zeka destekli, seviyene göre uyarlanan bir dil öğretmeni. İngilizce başta olmak üzere konuşarak öğren.</p>
+    <div class="free">✅ Ücretsiz ve hazır - anahtar girmene gerek yok.</div>
+
+    <div class="field-group">
+      <label>Öğrenmek istediğin dil</label>
+      <select id="target-lang">
+        <option value="İngilizce">🇬🇧 İngilizce</option>
+        <option value="Almanca">🇩🇪 Almanca</option>
+        <option value="Fransızca">🇫🇷 Fransızca</option>
+        <option value="İspanyolca">🇪🇸 İspanyolca</option>
+        <option value="İtalyanca">🇮🇹 İtalyanca</option>
+        <option value="Japonca">🇯🇵 Japonca</option>
+        <option value="Korece">🇰🇷 Korece</option>
+        <option value="Arapça">🇸🇦 Arapça</option>
+        <option value="Portekizce">🇵🇹 Portekizce</option>
+        <option value="Rusça">🇷🇺 Rusça</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Senin ana dilin</label>
+      <select id="native-lang">
+        <option value="Türkçe">Türkçe</option>
+        <option value="İngilizce">İngilizce</option>
+        <option value="Arapça">Arapça</option>
+        <option value="Almanca">Almanca</option>
+        <option value="Fransızca">Fransızca</option>
+      </select>
+    </div>
+
+    <hr class="divider">
+    <div class="field-group">
+      <div class="section-title">Seviyeni seç</div>
+      <div class="level-picker">
+        <button class="lvl-btn selected" data-level="A1" onclick="selectLevel(this)">A1<span>Yeni Başlayan</span></button>
+        <button class="lvl-btn" data-level="A2" onclick="selectLevel(this)">A2<span>Temel</span></button>
+        <button class="lvl-btn" data-level="B1" onclick="selectLevel(this)">B1<span>Orta</span></button>
+        <button class="lvl-btn" data-level="B2" onclick="selectLevel(this)">B2<span>Üst-Orta</span></button>
+        <button class="lvl-btn" data-level="C1" onclick="selectLevel(this)">C1<span>İleri</span></button>
+        <button class="lvl-btn" data-level="otomatik" onclick="selectLevel(this)">🔍<span>Otomatik</span></button>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startSession()">Başla →</button>
+    <p class="key-hint">🔒 Konuşmaların yalnızca bu oturumda, tarayıcında. · Bir İyilik İçin Yapay Zeka projesi · © Eray Şenel</p>
+  </div>
+</div>
+
+<div id="chat" class="hidden"></div>
+<div id="input-bar" class="hidden">
+  <div class="cmd-strip" id="cmd-strip"></div>
+  <div class="input-row">
+    <textarea id="user-input" placeholder="Mesajını yaz…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendMessage()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+  </div>
+</div>
+
+<script>
+  const PROXY = "https://iyilikicinai.doksandokuz3032.workers.dev/";
+  let conversationHistory = [];
+  let targetLang = '', nativeLang = '', selectedLevel = 'A1', isWaiting = false;
+
+  const levelCommands = {
+    A1:['çeviri','yavaş','tekrar','test','seviye'],
+    A2:['çeviri','yavaş','tekrar','test','seviye','rolyap'],
+    B1:['çeviri','tekrar','test','seviye','deyim','tartış'],
+    B2:['test','seviye','eşdizim','resmî','münazara'],
+    C1:['seviye','test','nüans','stil','kültür'],
+    otomatik:['çeviri','yavaş','tekrar','test','seviye','deyim','eşdizim','rolyap','tartış','resmî','nüans','stil','kültür'],
+  };
+
+  function selectLevel(btn){document.querySelectorAll('.lvl-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');selectedLevel=btn.dataset.level;}
+
+  function buildSystemPrompt(target, native, level){
+    const p={
+      A1:`Sen ${target} öğreten, sabırlı ve uzman bir dil öğretmenisin. Öğrencinin ana dili ${native}, seviyesi A1 (yeni başlayan).
+SEVİYE KURALLARI (A1): Sadece ~500 temel kelime. Cümleler 4-6 kelime, yalnızca geniş zaman. Her ${target} cümlesinin yanına parantez içinde ${native} çevirisi. Somut günlük konular. Aynı kelimeleri tekrar et.
+İLETİŞİM: Tüm açıklamalar ${native}. Yeni kelime: kelime + anlam + örnek + okunuş ipucu.
+DÜZELTME: Önce olumlu söz, sonra en fazla 1 hata düzelt. Format: 'Doğrusu: ___' + nedeni.
+AKIŞ: Her cevap sonunda ${target}+${native} TEK basit soru. Öğrenciyi yağmura tutma.
+KOMUTLAR: çeviri / yavaş / tekrar / test / seviye
+İLK MESAJ: ${target} kısa selam + ${native} çeviri, kendini tanıt, adını sor.`,
+      A2:`Sen ${target} öğreten uzman bir öğretmensin. Öğrencinin ana dili ${native}, seviyesi A2.
+SEVİYE KURALLARI: ~1000 kelime; geçmiş/gelecek basit; çeviri sadece zor kelimelerde; %70 ${native} %30 ${target}. Mini rol-yap senaryoları.
+DÜZELTME: Reformülasyon + 1 satır kural, en fazla 2 hata.
+KOMUTLAR: çeviri / yavaş / tekrar / test / seviye / rolyap
+İLK MESAJ: ${target} selam, bugününü 2-3 cümle anlat de; zor kelimeleri önceden ver.`,
+      B1:`Sen ${target} öğreten uzman bir öğretmensin. Öğrencinin ana dili ${native}, seviyesi B1.
+KURALLAR: Varsayılan dil ${target}; koşul/bağlaç kullandır; ara sıra deyim tanıt. Mesaj sonunda 'DÜZELTMELER' bölümü (max 3 madde) + doğal alternatif.
+KOMUTLAR: çeviri / tekrar / test / seviye / deyim / tartış
+İLK MESAJ: ${target} ile ilgi çekici günlük konu aç, öğrencinin fikrini sor.`,
+      B2:`Sen ${target} öğreten uzman bir öğretmensin. Öğrencinin ana dili ${native}, seviyesi B2.
+KURALLAR: Tamamen ${target}; soyut konular; eşdizim+üslup odağı; mesaj sonunda 'İNCE AYAR' bölümü; münazara modu.
+KOMUTLAR: test / seviye / eşdizim / resmî / münazara
+İLK MESAJ: ${target} ile güncel/soyut konu aç, net bir görüş sorusuyla başlat.`,
+      C1:`Sen ${target} öğreten uzman bir öğretmensin. Öğrencinin ana dili ${native}, seviyesi C1.
+KURALLAR: Yalnızca ${target}; ince hata/ton/register odağı; nüans ve kültürel not; cerrahi düzeltme + stil yeniden yazımı.
+KOMUTLAR: seviye / test / nüans / stil / kültür
+İLK MESAJ: Düşündürücü soyut konu aç; gerekçeli yapılandırılmış görüş iste.`,
+      otomatik:`Sen ${target} öğreten, adaptif ve uzman bir dil öğretmenisin. Öğrencinin ana dili ${native}. Seviye henüz belirlenmedi.
+BAŞLANGIÇ: 3 kısa soruyla A1-C1 arasında seviyeyi ölç, tahminini söyle, onay al. Onay sonrası o seviyenin kurallarıyla devam et. 5+ mesaj hatasızsa bir üst seviyeye geçmeyi öner.
+KOMUTLAR: çeviri yavaş tekrar test seviye deyim eşdizim rolyap tartış resmî nüans stil kültür
+İLK MESAJ: ${native} dilinde selamla, seviye ölçümü yapacağını belirt, ilk soruyu sor.`
+    };
+    return p[level]||p['A1'];
+  }
+
+  async function callProxy(messages, systemPrompt){
+    const oai=[{role:'system',content:systemPrompt},...messages.map(m=>({role:m.role,content:m.content}))];
+    const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:oai,temperature:0.7})});
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
+    if(!data.choices||!data.choices[0])throw new Error('Beklenmedik yanıt');
+    return (data.choices[0].message.content||'').trim();
+  }
+
+  async function startSession(){
+    targetLang=document.getElementById('target-lang').value;
+    nativeLang=document.getElementById('native-lang').value;
+    document.getElementById('setup').classList.add('hidden');
+    document.getElementById('chat').classList.remove('hidden');
+    document.getElementById('input-bar').classList.remove('hidden');
+    document.getElementById('reset-btn').classList.remove('hidden');
+    const displayLevel=selectedLevel==='otomatik'?'🔍':selectedLevel;
+    document.getElementById('level-badge').textContent=displayLevel;
+    document.getElementById('header-subtitle').textContent=`${targetLang} · ${selectedLevel==='otomatik'?'Otomatik':selectedLevel}`;
+    const strip=document.getElementById('cmd-strip');strip.innerHTML='';
+    (levelCommands[selectedLevel]||levelCommands['A1']).forEach(cmd=>{const btn=document.createElement('button');btn.className='cmd-btn';btn.textContent=cmd;btn.onclick=()=>sendCommand(cmd);strip.appendChild(btn);});
+    await doCall('Merhaba! Başlayalım.',true);
+  }
+  function resetSession(){
+    conversationHistory=[];
+    document.getElementById('chat').innerHTML='';
+    document.getElementById('chat').classList.add('hidden');
+    document.getElementById('input-bar').classList.add('hidden');
+    document.getElementById('reset-btn').classList.add('hidden');
+    document.getElementById('setup').classList.remove('hidden');
+    document.getElementById('level-badge').textContent='–';
+    document.getElementById('header-subtitle').textContent='Dil Öğretmenin';
+  }
+  async function sendMessage(){
+    const input=document.getElementById('user-input');const text=input.value.trim();
+    if(!text||isWaiting)return;input.value='';input.style.height='';
+    addBubble('user',text);conversationHistory.push({role:'user',content:text});await doCall(null,false);
+  }
+  async function sendCommand(cmd){if(isWaiting)return;addBubble('user',cmd);conversationHistory.push({role:'user',content:cmd});await doCall(null,false);}
+  async function doCall(firstMsg,isFirst){
+    isWaiting=true;document.getElementById('send-btn').disabled=true;
+    if(isFirst)conversationHistory.push({role:'user',content:firstMsg});
+    const typingId=showTyping();
+    try{
+      const reply=await callProxy(conversationHistory,buildSystemPrompt(targetLang,nativeLang,selectedLevel));
+      removeTyping(typingId);
+      if(reply){addBubble('ai',reply);conversationHistory.push({role:'assistant',content:reply});}
+      else addBubble('ai','⚠️ Boş yanıt alındı, tekrar dene.');
+    }catch(err){removeTyping(typingId);addBubble('ai','⚠️ Hata: '+err.message);}
+    isWaiting=false;document.getElementById('send-btn').disabled=false;document.getElementById('user-input').focus();
+  }
+  function addBubble(role,text){
+    const chat=document.getElementById('chat');const row=document.createElement('div');row.className=`bubble-row ${role}`;
+    const av=document.createElement('div');av.className=`avatar ${role}`;av.textContent=role==='ai'?'🎓':'✦';
+    const bub=document.createElement('div');bub.className=`bubble ${role}`;bub.textContent=text;
+    row.appendChild(av);row.appendChild(bub);chat.appendChild(row);chat.scrollTop=chat.scrollHeight;
+  }
+  let tc=0;
+  function showTyping(){
+    const id='tp-'+(++tc);const chat=document.getElementById('chat');const row=document.createElement('div');row.className='bubble-row ai';row.id=id;
+    const av=document.createElement('div');av.className='avatar ai';av.textContent='🎓';
+    const bub=document.createElement('div');bub.className='bubble ai';bub.innerHTML='<div class="typing-indicator"><span></span><span></span><span></span></div>';
+    row.appendChild(av);row.appendChild(bub);chat.appendChild(row);chat.scrollTop=chat.scrollHeight;return id;
+  }
+  function removeTyping(id){const el=document.getElementById(id);if(el)el.remove();}
+  function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+  function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+</script>
+</body>
+</html>
