@@ -67,7 +67,10 @@
     <span class="level-badge" id="level-badge">–</span>
     <span class="header-title" id="header-subtitle">Dil Öğretmenin</span>
   </div>
-  <button class="reset-btn hidden" id="reset-btn" onclick="resetSession()">↩ Yeniden Başla</button>
+  <div style="display:flex;gap:8px;align-items:center">
+    <a href="https://eraysenel.github.io/iyilik-icin-ai/" target="_blank" rel="noopener" class="reset-btn" style="text-decoration:none">🌍 Tüm projeler</a>
+    <button class="reset-btn hidden" id="reset-btn" onclick="resetSession()">↩ Yeniden Başla</button>
+  </div>
 </header>
 
 <div id="setup">
@@ -116,7 +119,7 @@
     </div>
 
     <button class="start-btn" onclick="startSession()">Başla →</button>
-    <p class="key-hint">🔒 Konuşmaların yalnızca bu oturumda, tarayıcında. · Bir İyilik İçin Yapay Zeka projesi · © Eray Şenel</p>
+    <p class="key-hint">🔒 Konuşmaların yalnızca bu cihazda saklanır (yenileyince kaybolmaz). · <a href="https://eraysenel.github.io/iyilik-icin-ai/" target="_blank" rel="noopener" style="color:var(--accent)">İyilik İçin Yapay Zeka</a> · © Eray Şenel</p>
   </div>
 </div>
 
@@ -203,7 +206,7 @@ KOMUTLAR: çeviri yavaş tekrar test seviye deyim eşdizim rolyap tartış resm�
     await doCall('Merhaba! Başlayalım.',true);
   }
   function resetSession(){
-    conversationHistory=[];
+    conversationHistory=[];localStorage.removeItem('dt_session');
     document.getElementById('chat').innerHTML='';
     document.getElementById('chat').classList.add('hidden');
     document.getElementById('input-bar').classList.add('hidden');
@@ -228,7 +231,7 @@ KOMUTLAR: çeviri yavaş tekrar test seviye deyim eşdizim rolyap tartış resm�
       if(reply){addBubble('ai',reply);conversationHistory.push({role:'assistant',content:reply});}
       else addBubble('ai','⚠️ Boş yanıt alındı, tekrar dene.');
     }catch(err){removeTyping(typingId);addBubble('ai','⚠️ Hata: '+err.message);}
-    isWaiting=false;document.getElementById('send-btn').disabled=false;document.getElementById('user-input').focus();
+    saveSession();isWaiting=false;document.getElementById('send-btn').disabled=false;document.getElementById('user-input').focus();
   }
   function addBubble(role,text){
     const chat=document.getElementById('chat');const row=document.createElement('div');row.className=`bubble-row ${role}`;
@@ -246,6 +249,21 @@ KOMUTLAR: çeviri yavaş tekrar test seviye deyim eşdizim rolyap tartış resm�
   function removeTyping(id){const el=document.getElementById(id);if(el)el.remove();}
   function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
   function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+
+  function saveSession(){try{localStorage.setItem('dt_session',JSON.stringify({targetLang:targetLang,nativeLang:nativeLang,selectedLevel:selectedLevel,history:conversationHistory}));}catch(e){}}
+  function restoreSession(s){
+    targetLang=s.targetLang;nativeLang=s.nativeLang;selectedLevel=s.selectedLevel;conversationHistory=s.history||[];
+    document.getElementById('setup').classList.add('hidden');
+    document.getElementById('chat').classList.remove('hidden');
+    document.getElementById('input-bar').classList.remove('hidden');
+    document.getElementById('reset-btn').classList.remove('hidden');
+    document.getElementById('level-badge').textContent=selectedLevel==='otomatik'?'🔍':selectedLevel;
+    document.getElementById('header-subtitle').textContent=`${targetLang} · ${selectedLevel==='otomatik'?'Otomatik':selectedLevel}`;
+    const strip=document.getElementById('cmd-strip');strip.innerHTML='';
+    (levelCommands[selectedLevel]||levelCommands['A1']).forEach(cmd=>{const btn=document.createElement('button');btn.className='cmd-btn';btn.textContent=cmd;btn.onclick=()=>sendCommand(cmd);strip.appendChild(btn);});
+    conversationHistory.forEach((m,i)=>{if(i===0&&m.role==='user')return;addBubble(m.role==='assistant'?'ai':'user',m.content);});
+  }
+  (function(){try{var s=JSON.parse(localStorage.getItem('dt_session')||'null');if(s&&s.history&&s.history.length)restoreSession(s);}catch(e){}})();
 </script>
 </body>
 </html>
